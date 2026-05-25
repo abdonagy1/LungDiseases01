@@ -63,9 +63,9 @@ namespace LungDiseases
 
 
             var app = builder.Build();
-           
+
             #region Data
-           await app.MigrateIdentityDatabaseAsync();
+            await app.MigrateIdentityDatabaseAsync();
 
             #endregion
 
