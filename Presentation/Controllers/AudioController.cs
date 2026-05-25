@@ -24,6 +24,7 @@ namespace Presentation.Controllers
             _analysisService = analysisService;
         }
 
+        
 
         [HttpPost("analysis")]
         public async Task<ActionResult<AudioAnalysisResultDto>> AnalysisAudioAsync(IFormFile audioFile)

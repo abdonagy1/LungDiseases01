@@ -21,9 +21,9 @@ namespace Persistence.IdentityData.DbContext
         {
             base.OnModelCreating(builder);
            
-            builder.Entity<ApplicationUser>().ToTable(name: "Users");
-            builder.Entity<IdentityRole>().ToTable(name: "Roles");
-            builder.Entity<IdentityUserRole<string>>().ToTable(name: "UserRoles");
+            builder.Entity<ApplicationUser>().ToTable( "Users");
+            builder.Entity<IdentityRole>().ToTable( "Roles");
+            builder.Entity<IdentityUserRole<string>>().ToTable( "UserRoles");
         }
 
     }

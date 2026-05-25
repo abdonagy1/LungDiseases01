@@ -12,5 +12,8 @@ namespace LungDisease.Service_Abstraction
     public interface IAttachmentService
     {
         Task<Result<AudioAnalysisResultDto>> AnalysisAsync(IFormFile audioFile);
+
+        Task<Result<string?>> UploadAsync(string FolderName, IFormFile File);
+        Result<bool> Delete(string FileName,string FolderName);
     }
 }

@@ -49,15 +49,23 @@ namespace LungDiseases
                     ValidateLifetime = true,
                     ValidIssuer = builder.Configuration["JWTOptions:Issuer"],
                     ValidAudience = builder.Configuration["JWTOptions:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:SecretKey"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:Secretkey"]))
                 };
             });
+            builder.Services.AddHttpClient<IAIClient, AIClient>();
+
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+
+
+
             #endregion
 
-            var app = builder.Build();
 
+
+            var app = builder.Build();
+           
             #region Data
-            await app.MigrateIdentityDatabaseAsync();
+           await app.MigrateIdentityDatabaseAsync();
 
             #endregion
 

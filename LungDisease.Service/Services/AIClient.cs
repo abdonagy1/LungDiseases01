@@ -30,8 +30,10 @@ namespace LungDisease.Service.Services
 
             form.Add(fileContent, "file", Path.GetFileName(filePath));
 
+            var Url = "https://coolish-nonarbitrarily-rochell.ngrok-free.dev/predict";
             
-            var response = await _httpClient.PostAsync("https://localhost:7060/api/audio/analyze", form);
+
+            var response = await _httpClient.PostAsync(Url, form);
 
             response.EnsureSuccessStatusCode();
 
