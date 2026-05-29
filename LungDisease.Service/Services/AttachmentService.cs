@@ -15,103 +15,116 @@ namespace LungDisease.Service.Services
     {
         private readonly IAIClient _aiClient;
         private readonly IWebHostEnvironment _webHost;
-        private readonly string _uploadsDir = "Uploads";
-        private readonly string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+
+        private readonly string _uploadsDir;
+        private readonly string[] allowedExtensions = { ".mp3", ".wav", ".ogg", ".m4a" };
         private readonly long MaxFileSize = 5 * 1024 * 1024;
 
-        public AttachmentService(IAIClient aiClient,IWebHostEnvironment webHost)
+        public AttachmentService(IAIClient aiClient, IWebHostEnvironment webHost)
         {
             _aiClient = aiClient;
             _webHost = webHost;
+
+            _uploadsDir = Path.Combine(_webHost.ContentRootPath, "Uploads");
             Directory.CreateDirectory(_uploadsDir);
         }
+
         public async Task<Result<AudioAnalysisResultDto>> AnalysisAsync(IFormFile audioFile)
         {
-            if (audioFile is  null || audioFile.Length == 0)
+            if (audioFile is null || audioFile.Length == 0)
                 throw new ArgumentException("Audio file is required");
 
-            var filePath = Path.Combine(_uploadsDir, audioFile.FileName);
+            if (audioFile.Length > MaxFileSize)
+                return Error.Failure("File too large");
 
+            var extension = Path.GetExtension(audioFile.FileName).ToLower();
 
-            await using var stream = new FileStream(filePath, FileMode.Create);
+            if (!allowedExtensions.Contains(extension))
+                return Error.Failure("Invalid file type");
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(_uploadsDir, fileName);
+
+            // 1. Save file (IMPORTANT: close stream immediately)
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
                 await audioFile.CopyToAsync(stream);
-            
+            }
 
             try
             {
-                
+                // 2. Send to AI (file is NOT locked anymore)
                 var aiResult = await _aiClient.AnalysisAudioAsync(filePath);
 
                 return aiResult;
             }
             finally
             {
-                
+                // 3. Safe delete
                 if (File.Exists(filePath))
                     File.Delete(filePath);
             }
         }
 
-        #region Delete and Upload
-        public Result<bool> Delete(string FileName, string FolderName)
+        #region Upload Image (fixed naming bug)
+
+        public async Task<Result<string?>> UploadAsync(string folderName, IFormFile file)
         {
             try
             {
-                if (string.IsNullOrEmpty(FileName) || string.IsNullOrEmpty(FolderName))
-                    return Error.Failure("FileName.Failure Or FolderName.Failure", "FileName Is Empty Or FolderName Is Empty");
-                var FallPath = Path.Combine(_webHost.WebRootPath, "images", FolderName, FileName);
+                if (string.IsNullOrWhiteSpace(folderName) || file is null || file.Length == 0)
+                    return Error.Failure("Invalid input");
 
-                if (File.Exists(FallPath))
-                {
-                    File.Delete(FallPath);
-                    return true;
-                }
-                return Error.NotFound();
+                if (file.Length > MaxFileSize)
+                    return Error.Failure("File too large");
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed To Delete File with Name {FileName} : {ex}");
-                return false;
-            }
-        }
-
-        public async Task<Result<string?>> UploadAsync(string FolderName, IFormFile File)
-        {
-            try
-            {
-                if (FolderName is null || File is null || File.Length == 0)
-                    return Error.NotFound("FolderName.NotFound Or File.NotFound");
-
-                if (File.Length > MaxFileSize)
-                    return null;
-
-                var extension = Path.GetExtension(File.FileName).ToLower();
+                var extension = Path.GetExtension(file.FileName).ToLower();
 
                 if (!allowedExtensions.Contains(extension))
-                    return null;
+                    return Error.Failure("Invalid file type");
 
-                var FolderPath = Path.Combine(_webHost.WebRootPath, "images", FolderName);
+                var folderPath = Path.Combine(_webHost.WebRootPath, "images", folderName);
+                Directory.CreateDirectory(folderPath);
 
-                if (!Directory.Exists(FolderPath))
-                    Directory.CreateDirectory(FolderPath);
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(folderPath, fileName);
 
-                var fileName = Guid.NewGuid().ToString() + extension;
-
-                var FilePath = Path.Combine(FolderPath, fileName);
-
-                await using var fileStream = new FileStream(FilePath, FileMode.Create);
-
-                await File.CopyToAsync(fileStream);
+                await using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
 
                 return fileName;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed ToUpload File To Folder = {FolderName} : {ex}");
-                return null;
+                Console.WriteLine(ex);
+                return Error.Failure("Upload failed");
             }
-        } 
+        }
+
+
+        public Result<bool> Delete(string fileName, string folderName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(folderName))
+                    return Error.Failure("Invalid input");
+
+                var path = Path.Combine(_webHost.WebRootPath, "images", folderName, fileName);
+
+                if (!File.Exists(path))
+                    return Error.NotFound();
+
+                File.Delete(path);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
         #endregion
     }
 }

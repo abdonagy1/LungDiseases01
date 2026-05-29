@@ -10,6 +10,6 @@ namespace LungDisease.Service_Abstraction
 {
     public interface IAIClient
     {
-        Task<AudioAnalysisResultDto> AnalysisAudioAsync(string filePath);
+        Task<Result<AudioAnalysisResultDto>> AnalysisAudioAsync(string filePath);
     }
 }

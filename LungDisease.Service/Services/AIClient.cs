@@ -16,32 +16,39 @@ namespace LungDisease.Service.Services
 
         public AIClient(HttpClient httpClient) => _httpClient = httpClient;
 
-        public async Task<AudioAnalysisResultDto> AnalysisAudioAsync(string filePath)
+        public async Task<Result<AudioAnalysisResultDto>> AnalysisAudioAsync(string filePath)
         {
             if (!File.Exists(filePath))
-                throw new FileNotFoundException("Audio file not found", filePath);
+                return Error.NotFound("Audio file not found");
 
             using var form = new MultipartFormDataContent();
 
-            
             var fileContent = new ByteArrayContent(await File.ReadAllBytesAsync(filePath));
+
             fileContent.Headers.ContentType =
                 System.Net.Http.Headers.MediaTypeHeaderValue.Parse("audio/wav");
 
-            form.Add(fileContent, "file", Path.GetFileName(filePath));
+            form.Add(fileContent, "audioFile", Path.GetFileName(filePath));
 
-            var Url = "https://coolish-nonarbitrarily-rochell.ngrok-free.dev/predict";
-            
+            var url = "https://albraaalqady-lung-disease-api.hf.space/predict";
 
-            var response = await _httpClient.PostAsync(Url, form);
+            var response = await _httpClient.PostAsync(url, form);
 
-            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
 
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<AudioAnalysisResultDto>(json);
+            if (!response.IsSuccessStatusCode)
+                return Error.Failure(
+                    $"AI API Error: {(int)response.StatusCode} - {responseBody}");
+
+            var result = JsonSerializer.Deserialize<AudioAnalysisResultDto>(
+                responseBody,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
             if (result == null)
-                throw new Exception("Failed to deserialize AI response");
+                return Error.Failure("Failed to deserialize AI response");
 
             return result;
         }
