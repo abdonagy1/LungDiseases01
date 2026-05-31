@@ -25,6 +25,16 @@ namespace LungDiseases
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors(Option => Option.AddPolicy("AllowFrontend",
+                policy =>
+            {
+                policy.WithOrigins(
+                    "http://127.0.0.1:5501",
+                    "http://localhost:5501")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            }));
+          
 
 
             builder.Services.AddDbContext<LungIdentityDbContext>(option =>
