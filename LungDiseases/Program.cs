@@ -42,6 +42,7 @@ namespace LungDiseases
                 option.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
             });
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddIdentityCore<ApplicationUser>().AddEntityFrameworkStores<LungIdentityDbContext>();
             builder.Services.AddAuthentication(option =>
             {

@@ -65,9 +65,9 @@ namespace LungDisease.Service.Services
         {
             var Claims = new List<Claim>()
             {
-               new Claim ( JwtRegisteredClaimNames.Email , user. Email!),
-
+                new Claim ( JwtRegisteredClaimNames.Email , user. Email!),
                 new Claim( JwtRegisteredClaimNames.Name,user.UserName!),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id)
             };
 
 

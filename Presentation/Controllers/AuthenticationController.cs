@@ -36,6 +36,7 @@ namespace Presentation.Controllers
             var Result = await _authenticationService.RegisterAsync(registerDTO);
             return HandleResult(Result);
         }
+
       
     }
 }
