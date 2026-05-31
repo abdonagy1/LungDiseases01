@@ -73,6 +73,7 @@ namespace LungDiseases
 
 
             var app = builder.Build();
+            app.UseCors("AllowFrontend");
 
             #region Data
             await app.MigrateIdentityDatabaseAsync();
