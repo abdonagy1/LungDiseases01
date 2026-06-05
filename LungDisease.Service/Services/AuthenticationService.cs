@@ -29,12 +29,12 @@ namespace LungDisease.Service.Services
         {
             var User = await _userManager.FindByEmailAsync(loginDTO.Email);
             if (User is null)
-                return Error.InvalidCredentials("User.InvalidCredentials");
+                return Error.InvalidCredentials("Email.InvalidCredentials");
 
             var IsPasswordValid = await _userManager.CheckPasswordAsync(User, loginDTO.Password);
 
             if (!IsPasswordValid)
-                Error.InvalidCredentials("User.InvalidCredentials");
+               return Error.InvalidCredentials("Password.InvalidCredentials");
             var Token = await CreateTokenAsync(User);
             return new UserDTO(User.Email!, User.DisplayName, Token);
 
