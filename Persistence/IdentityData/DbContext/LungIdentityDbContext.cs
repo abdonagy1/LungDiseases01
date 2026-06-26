@@ -20,7 +20,9 @@ namespace Persistence.IdentityData.DbContext
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-           
+            builder.Entity<ApplicationUser>()
+.HasIndex(u => u.NormalizedUserName)
+.IsUnique(false);
             builder.Entity<ApplicationUser>().ToTable( "Users");
             builder.Entity<IdentityRole>().ToTable( "Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable( "UserRoles");

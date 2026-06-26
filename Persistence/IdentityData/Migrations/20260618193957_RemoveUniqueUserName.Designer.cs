@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.IdentityData.DbContext;
 
@@ -11,9 +12,11 @@ using Persistence.IdentityData.DbContext;
 namespace Persistence.IdentityData.Migrations
 {
     [DbContext(typeof(LungIdentityDbContext))]
-    partial class StoreIdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260618193957_RemoveUniqueUserName")]
+    partial class RemoveUniqueUserName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

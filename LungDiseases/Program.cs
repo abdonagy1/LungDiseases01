@@ -1,10 +1,14 @@
 
 using System.Text;
+using Inventra.Service_Abstraction;
 using LungDisease.Domain.IdentityModule;
+using LungDisease.Service.EmailSettings;
+using LungDisease.Service.Service;
 using LungDisease.Service.Services;
 using LungDisease.Service_Abstraction;
 using LungDiseases.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -25,16 +29,18 @@ namespace LungDiseases
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddCors(Option => Option.AddPolicy("AllowFrontend",
-                policy =>
-            {
-                policy.WithOrigins(
-                    "http://127.0.0.1:5501",
-                    "http://localhost:5501")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+            builder.Services.AddCors(option => option.AddPolicy("AllowFrontend",
+    policy =>
+             {
+            policy.WithOrigins(
+            "http://127.0.0.1:5501",
+            "http://localhost:5501",
+            "https://ai-pulmonary.vercel.app"
+            )
+              .AllowAnyHeader()
+              .AllowAnyMethod();
             }));
-          
+
 
 
             builder.Services.AddDbContext<LungIdentityDbContext>(option =>
@@ -64,8 +70,15 @@ namespace LungDiseases
                 };
             });
             builder.Services.AddHttpClient<IAIClient, AIClient>();
+            builder.Services.AddIdentityCore<ApplicationUser>().AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<LungIdentityDbContext>().AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+
+            builder.Services.Configure<EmailSetting>(
+             builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddMemoryCache();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 

@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace LungDisease.Shared.DataTransferObjects.IdentityDTOs
 {
-    public record UserDTO(string Email, string Display, string Token);
+    public record UserDTO(string Email, string DisplayName, string Token);
 }

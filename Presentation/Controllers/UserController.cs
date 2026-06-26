@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers
 {
     [Authorize]
-    public class UserController: ApiBaseController
+    public class UserController : ApiBaseController
     {
         private readonly IUserService _userService;
 
@@ -33,6 +33,18 @@ namespace Presentation.Controllers
             var result = await _userService.GetCurrentUserAsync(userId);
 
             return HandleResult(result);
+        }
+        [HttpPut("profileUpdate")]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDto model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _userService.UpdateProfileAsync(userId!, model);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.IsFailure);
+
+            return Ok("Profile updated successfully");
         }
     }
 }

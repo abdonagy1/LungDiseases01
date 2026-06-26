@@ -11,5 +11,6 @@ namespace LungDisease.Service_Abstraction
     public interface IUserService
     {
         Task<Result<UserProfileDto>> GetCurrentUserAsync(string userId);
+        Task<Result> UpdateProfileAsync(string userId, UpdateProfileDto updateProfile);
     }
 }
